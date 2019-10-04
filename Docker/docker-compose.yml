@@ -1,0 +1,43 @@
+version: '3'
+services:
+### www ##################################################
+    www:
+        build: .
+        ports:
+            - "${WWW_PORT}:80"
+        volumes:            
+            - ${DATA_PATH_HOST}\www:/var/www/html
+        links:
+            - db
+        networks:
+            - default
+### MySQL ################################################
+    db:
+      image: mysql:5.7.13
+      ports:
+        - "${MYSQL_PORT}:3306"
+      environment:
+        - MYSQL_DATABASE=${MYSQL_DATABASE}
+        - MYSQL_USER=${MYSQL_USER}
+        - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+        - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+        - TZ=${WORKSPACE_TIMEZONE}
+      volumes:
+        - ${DATA_PATH_HOST}\dump:/docker-entrypoint-initdb.d
+        - persistent:/var/lib/mysql        
+      networks:
+        - default
+## phpMyAdmin ############################################    
+    phpmyadmin:
+      image: phpmyadmin/phpmyadmin      
+      links: 
+        - db:db
+      ports:
+        - "${PMA_PORT}:80"
+      environment:        
+        - MYSQL_USER=${PMA_USER}
+        - MYSQL_PASSWORD=${PMA_PASSWORD}
+        - MYSQL_ROOT_PASSWORD=${PMA_ROOT_PASSWORD}        
+volumes:
+    persistent:
+        
